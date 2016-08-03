@@ -29,6 +29,7 @@ names(std) <- sub("Wavelength","ID",names(std)) #Rename first column to ID inste
 wavelength <- as.numeric(gsub('X','',names(data)[3:length(names(data))])) #Get wavelengths
 
 ### Plotting Spectra ###
+## WARNING: will produce 46 image files!
 acronym <- unique(meta$Acronym) #Get unique listing of acronyms
 for(a in acronym){
   plotData <- data.frame(wl = wavelength, t(avg[which(meta$Acronym %in% a),2:ncol(avg)])) #make current data into data.frame for plotting
@@ -46,23 +47,39 @@ for(a in acronym){
 }
 
 ### Testing for Normality ###
-normTest <- array(0,dim = c(length(wavelength),4))#Empty array that will hold values below
-for(x in c(2:length(wavelength))){
-  ##Shapiro-Wilk Test for normality
-  test1 <- shapiro.test(avg[,x])
+## WARNING: will produce 1738 image files!
+normTest <- array(0,dim = c(length(wavelength),5))#Empty array that will hold values below
+normTest[,1] <- wavelength #add wavelength to the first column
+for(x in c(2:length(wavelength))){#Loop through wavelengths
+  
+  test1 <- shapiro.test(avg[,x]) ##Shapiro-Wilk Test for normality
+  normTest[x,3] <- test1$p.value #Add p-value to table
   if(test1$p.value > 0.05){ #retain the null hypothesis, normally distributed
-    normTest[x,1] <- 1 ## 1 = normally distributed
+    normTest[x,2] <- 1 ## 1 = normally distributed
   }else{ #reject the null hypothesis, NOT normally distributed
-    normTest[x,1] <- 0 ## 0 = not normally distributed
+    normTest[x,2] <- 0 ## 0 = not normally distributed
   }
-  normTest[x,2] <- test1$p.value
   
-  ##Skewness (asymmetric)
-  normTest[x,3] <- skewness(avg[,x])
+  normTest[x,4] <- skewness(avg[,x])##Skewness (asymmetric)
   
-  ##Kurosis (Pointed)
-  normTest[x,4] <- kurtosis(avg[,x])
+  normTest[x,5] <- kurtosis(avg[,x])##Kurosis (Pointed)
+  
+  plotData <- data.frame(avg[,x]) #add data to data frame for plotting
+  colnames(plotData) <- "wl" #change column name for plotting
+  ggplot(data = plotData,aes(wl))+ ##Plotting Histogram
+    geom_histogram(binwidth = 1) + #plot as histogram
+    ggtitle(wavelength[x]) + #add title to histogram
+    xlab("Reflectance (%)") #add xlabel
+  
+  plotName <- paste(directory,"Hist_Plots\\",round(wavelength[x]*1000,digits = 0),"_hist.png",sep="") #create plot name to save the file
+  ggsave(plotName,width = 3,height = 3) #save the plot
 }
+fileName <- paste(directory,"Hist_Plots\\normality_test_results.csv",sep="") 
+write(t(normTest),file = fileName,sep = ",")#save normality test data to file
 ##This data is not Normal - using non-parametric tests
 
-
+### Kruskal-Wallis ###
+##Since data is non-parametric, Kruskal-Wallis is need to compare samples
+for(x in c(2:length(wavelength))){ #Loop through wavelengths
+  
+}

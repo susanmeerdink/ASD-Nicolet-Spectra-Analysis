@@ -8,9 +8,10 @@
 ## This code will analyze the spectra to determine similarities and differences.
 ##--------------------------------------------------------------------------------
 ### Setting Up Environment ###
-library(ggplot2) #load ggplot2 library
+library(ggplot2) #load ggplot2 library for figures
 library(moments) #load moments library
-library(reshape2) #load reshape2 library
+library(reshape2) #load reshape2 library for data manipulation
+library(pgirmess) #load pgirmess library for kruskal wallis post hoc test
 
 ### Reading in Data ###
 directory <- "C:\\Users\\Susan\\Documents\\GitHub\\ASD-Nicolet-Spectra-Analysis\\"
@@ -29,7 +30,7 @@ names(std) <- sub("Wavelength","ID",names(std)) #Rename first column to ID inste
 wavelength <- as.numeric(gsub('X','',names(data)[3:length(names(data))])) #Get wavelengths
 
 ### Plotting Spectra ###
-## WARNING: will produce 46 image files!
+## WARNING: will produce 41 image files!
 acronym <- unique(meta$Acronym) #Get unique listing of acronyms
 for(a in acronym){
   plotData <- data.frame(wl = wavelength, t(avg[which(meta$Acronym %in% a),2:ncol(avg)])) #make current data into data.frame for plotting
@@ -50,25 +51,25 @@ for(a in acronym){
 ## WARNING: will produce 1738 image files!
 normTest <- array(0,dim = c(length(wavelength),5))#Empty array that will hold values below
 normTest[,1] <- wavelength #add wavelength to the first column
-for(x in c(2:length(wavelength))){#Loop through wavelengths
+for(x in c(2:ncol(avg))){#Loop through wavelengths
   
   test1 <- shapiro.test(avg[,x]) ##Shapiro-Wilk Test for normality
-  normTest[x,3] <- test1$p.value #Add p-value to table
+  normTest[x-1,3] <- test1$p.value #Add p-value to table
   if(test1$p.value > 0.05){ #retain the null hypothesis, normally distributed
-    normTest[x,2] <- 1 ## 1 = normally distributed
+    normTest[x-1,2] <- 1 ## 1 = normally distributed
   }else{ #reject the null hypothesis, NOT normally distributed
-    normTest[x,2] <- 0 ## 0 = not normally distributed
+    normTest[x-1,2] <- 0 ## 0 = not normally distributed
   }
   
-  normTest[x,4] <- skewness(avg[,x])##Skewness (asymmetric)
+  normTest[x-1,4] <- skewness(avg[,x])##Skewness (asymmetric)
   
-  normTest[x,5] <- kurtosis(avg[,x])##Kurosis (Pointed)
+  normTest[x-1,5] <- kurtosis(avg[,x])##Kurosis (Pointed)
   
   plotData <- data.frame(avg[,x]) #add data to data frame for plotting
   colnames(plotData) <- "wl" #change column name for plotting
   ggplot(data = plotData,aes(wl))+ ##Plotting Histogram
     geom_histogram(binwidth = 1) + #plot as histogram
-    ggtitle(wavelength[x]) + #add title to histogram
+    ggtitle(wavelength[x-1]) + #add title to histogram
     xlab("Reflectance (%)") #add xlabel
   
   plotName <- paste(directory,"Hist_Plots\\",round(wavelength[x]*1000,digits = 0),"_hist.png",sep="") #create plot name to save the file
@@ -80,6 +81,19 @@ write(t(normTest),file = fileName,sep = ",")#save normality test data to file
 
 ### Kruskal-Wallis ###
 ##Since data is non-parametric, Kruskal-Wallis is need to compare samples
-for(x in c(2:length(wavelength))){ #Loop through wavelengths
+kwResults <- array(0,dim = c(length(wavelength),2))#Empty array that will hold values below
+kwResults[,1] <- wavelength #add wavelength to the first column
+for(x in as.numeric(c(2,3,4))){ #Loop through wavelengths c(2:length(wavelength))
+  dataKW <- data.frame(spectra = avg[,x],acronym = meta$Acronym)
   
+  kwTest <- kruskal.test(spectra~acronym,data=dataKW) #perform kruskal-wallis test
+  kwResults[x-1,2] <- kwTest$p.value #add wavelength to the first column
+  
+  if(kwTest$p.value < 0.05){ #If the kruskal-wallis test yields a pvalue less than 0.05, run post hoc test to determine which samples differ
+    kwPostTest <- kruskalmc(dataKW$spectra,dataKW$acronym) #run post hoc kruskal wallis test 
+    
+    ggplot(data = dataKW,(aes(x = acronym,y=spectra)))+ 
+      geom_boxplot() #+
+      #theme(plot.margin = unit(c(1,3,1,1), "lines"))   # Make room for the grob
+  }
 }

@@ -6,7 +6,7 @@
 ## The result of this Java program is a .csv file with a two rows for each
 ## spectra process: averaged spectra and standard deviation.
 ## This code will analyze the spectra to determine similarities and differences.
-##--------------------------------------------------------------------------------
+###---------------------------------------------------------------------------------------------------------------------------- ###
 ### Setting Up Environment ###
 library(ggplot2) #load ggplot2 library for figures
 library(moments) #load moments library
@@ -28,8 +28,9 @@ std$um <- NULL #Remove column 2 with STD values
 names(avg) <- sub("Wavelength","ID",names(avg)) #Rename first column to ID instead of Wavelength
 names(std) <- sub("Wavelength","ID",names(std)) #Rename first column to ID instead of Wavelength
 wavelength <- as.numeric(gsub('X','',names(data)[3:length(names(data))])) #Get wavelengths
+###---------------------------------------------------------------------------------------------------------------------------- ###
 
-### Plotting Spectra ###
+### Plotting Spectra  by species ###
 ## WARNING: will produce 41 image files!
 acronym <- unique(meta$Acronym) #Get unique listing of acronyms
 for(a in acronym){
@@ -46,6 +47,30 @@ for(a in acronym){
   plotName = paste(directory,"Spectra_Plots\\",a,"_spectra.png",sep="") #create plot name to save the file
   ggsave(plotName,width = 10,height = 5) #save the plot
 }
+###---------------------------------------------------------------------------------------------------------------------------- ###
+
+### Plotting Average & STD of Spectra ###
+totalSpectra <- array(0,dim = c(length(wavelength),3))
+for(x in c(2:ncol(avg))){ #Loop through wavelengths 
+  totalSpectra[x-1,1] <- mean(avg[,(x)])
+  totalSpectra[x-1,2] <- min(avg[,(x)]) 
+  totalSpectra[x-1,3] <- max(avg[,(x)])
+}
+plotData <- data.frame(wl = wavelength,totalSpectra)
+colnames(plotData) <- c("wl","avg","min","max") #rename columns with ID
+plotDataMelt <-  melt(plotData,id.vars = 'wl') #Melt using wavelength as the ID variable (puts it in format to plot)
+ggplot(plotDataMelt,aes(x = wl, y = value, group = variable, color= variable)) + #Plotting the spectra  
+  geom_line()+ #plot as a line
+  geom_ribbon(aes(ymin = value,ymax = value)) +
+  xlab(expression(paste("Wavelength (",mu,"m)",sep ="")))+ #add xlabel
+  ylab("Reflectance (%)") + #add ylabel
+  coord_cartesian(xlim = c(2.5,13), ylim = c(0,25)) +#Fix axis
+  scale_y_continuous(expand = c(0,0)) + #remove y axis buffer (starts at 0% now)
+  scale_x_continuous(expand = c(0,0)) #remove x axis buffer (starts at 0% now)
+plotName = paste(directory,"Spectra_Plots\\","AVG_STD_spectra.png",sep="") #create plot name to save the file
+ggsave(plotName,width = 10,height = 5) #save the plot
+
+###---------------------------------------------------------------------------------------------------------------------------- ###
 
 ### Testing for Normality ###
 ## WARNING: will produce 1738 image files!
@@ -72,17 +97,20 @@ for(x in c(2:ncol(avg))){#Loop through wavelengths
     ggtitle(wavelength[x-1]) + #add title to histogram
     xlab("Reflectance (%)") #add xlabel
   
-  plotName <- paste(directory,"Hist_Plots\\",round(wavelength[x]*1000,digits = 0),"_hist.png",sep="") #create plot name to save the file
+  plotName <- paste(directory,"Hist_Plots\\",round(wavelength[x-1]*1000,digits = 0),"_hist.png",sep="") #create plot name to save the file
   ggsave(plotName,width = 3,height = 3) #save the plot
 }
 fileName <- paste(directory,"Hist_Plots\\normality_test_results.csv",sep="") 
 write(t(normTest),file = fileName,sep = ",")#save normality test data to file
 ##This data is not Normal - using non-parametric tests
+###---------------------------------------------------------------------------------------------------------------------------- ###
 
 ### Kruskal-Wallis ###
 ##Since data is non-parametric, Kruskal-Wallis is need to compare samples
 kwResults <- array(0,dim = c(length(wavelength),2))#Empty array that will hold values below
 kwResults[,1] <- wavelength #add wavelength to the first column
+fileName <- paste(directory,"Box_Plots\\kruskal_wallis_test_results.csv",sep="") #create filename that will hold kw test results
+write("Wavelength,KW_pvalue,Pair,obsdiff,criticaldiff,diff",file = fileName)#write header to file
 for(x in as.numeric(c(2,3,4))){ #Loop through wavelengths c(2:length(wavelength))
   dataKW <- data.frame(spectra = avg[,x],acronym = meta$Acronym)
   
@@ -92,8 +120,22 @@ for(x in as.numeric(c(2,3,4))){ #Loop through wavelengths c(2:length(wavelength)
   if(kwTest$p.value < 0.05){ #If the kruskal-wallis test yields a pvalue less than 0.05, run post hoc test to determine which samples differ
     kwPostTest <- kruskalmc(dataKW$spectra,dataKW$acronym) #run post hoc kruskal wallis test 
     
-    ggplot(data = dataKW,(aes(x = acronym,y=spectra)))+ 
-      geom_boxplot() #+
-      #theme(plot.margin = unit(c(1,3,1,1), "lines"))   # Make room for the grob
+    for(i in c(1:length(kwPostTest$dif.com[,3]))){
+      if(kwPostTest$dif.com[i,3] == TRUE){
+        output <- c(wavlength[x-1],kwPostTest$dif.com[i,])
+        write(output,file = fileName,append=TRUE) #add line to file      
+      }  
+    }
   }
+      
+  ggplot(data = dataKW,(aes(x = acronym,y=spectra)))+ 
+    geom_boxplot() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) + #rotate x labels
+    xlab("Plant Species Acronym") + #add x label
+    ylab("Reflectance (%)") + #add y label
+    ggtitle(wavelength[x-1]) #add title
+    
+  plotName <- paste(directory,"Box_Plots\\",round(wavelength[x-1]*1000,digits = 0),"_box.png",sep="") #create plot name to save the file
+  ggsave(plotName,width = 10,height = 5) #save the plot
 }
+###---------------------------------------------------------------------------------------------------------------------------- ###

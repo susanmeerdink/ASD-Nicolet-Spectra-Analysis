@@ -1,11 +1,11 @@
-### Nicolet-Spectra-Analysis ###
+### Nicolet_Data_Prep ###
 ## Susan Meerdink
 ## 10/12/2016
 ## This code reads in Nicolet spectra that have been averaged using 
 ## https://github.com/susanmeerdink/ASD-Nicolet-Spectra-Processing.
 ## The result of this Java program is a .csv file with a two rows for each
 ## spectra process: averaged spectra and standard deviation.
-## This code will analyze the spectra to determine similarities and differences.
+## This code will format that spectral library for future analysis (pulls out species with 3 or more samples).
 ###---------------------------------------------------------------------------------------------------------------------------- ###
 ### Setting Up Environment ###
 library(dplyr) #load dplyr for data manipulation 

@@ -1,10 +1,7 @@
 ### Nicolet-Spectra-Analysis ###
 ## Susan Meerdink
 ## 10/12/2016
-## This code reads in Nicolet spectra that have been averaged using 
-## https://github.com/susanmeerdink/ASD-Nicolet-Spectra-Processing.
-## The result of this Java program is a .csv file with a two rows for each
-## spectra process: averaged spectra and standard deviation.
+## This code reads in Nicolet spectra processed by Nicolet_Data_Prep.R 
 ## This code will analyze the spectra to determine similarities and differences.
 ###---------------------------------------------------------------------------------------------------------------------------- ###
 ### Setting Up Environment ###
@@ -111,8 +108,10 @@ windows() #open it in a new window
 ggplot(data = dunnResults, aes(dunnResults$Wavelength)) + #Plot the data
   geom_histogram(binwidth = .4, fill = "gray",col = "black",boundary = 0) + #Plot it as a Histogram
   theme_set(theme_bw(base_size=20)) + #Set the theme 
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 45000)) + #removing offset on y axis
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 15000)) + #removing offset on y axis
   scale_x_continuous(breaks = seq(2.5,15,1.5)) + #changing tick mark frequency in x axis
+  geom_line(aes(y = colMean(spectra(2:length(spectra)))*10000))+
   labs(x = expression(paste("Wavelength (",mu,"m)")), y = "Frequency") #Add labels to plot
 plotName = paste(directory,"Kruskal_Wallis_Test\\Pair_Wavelength_Frequency.png",sep="") #create plot name to save the file
 ggsave(plotName,width = 10,height = 7) #save the plot
+

@@ -33,15 +33,31 @@ spectra <- vector()
 meta <- vector()
 for(i in 1:nrow(replicationCount)){
   if(replicationCount$n[i] > 2){ #if there is more than one sample for a species...
-    tempSpectra <- allSpectra[which(allMeta$Acronym %in% replicationCount$Acronym[i]),] #Get data for that species
-    tempMeta <- allMeta[which(allMeta$Acronym %in% replicationCount$Acronym[i]),] #Get metadata for that species
-    spectra <- rbind(spectra, tempSpectra)
-    meta <- rbind(meta,tempMeta)
+    if(i != 3 & i != 6 & i != 7 & i != 10 & i != 28){ #,7,10,28
+      print(i)
+      tempSpectra <- allSpectra[which(allMeta$Acronym %in% replicationCount$Acronym[i]),] #Get data for that species
+      tempMeta <- allMeta[which(allMeta$Acronym %in% replicationCount$Acronym[i]),] #Get metadata for that species
+      spectra <- rbind(spectra, tempSpectra)
+      meta <- rbind(meta,tempMeta)
+    }
   }
 }
+noSpeciesList = c('AGAT','ALARF','ALBA','BERE','FICO')
+
 fileNameKW <- paste(directory,"Nicolet_Averaged_Spectra_Huntington_rep3.csv",sep="") #create filename that will hold kw test results
 write.table(spectra,file = fileNameKW,sep=",")#write header to file
 
 fileNameKW <- paste(directory,"Nicolet_Averaged_Spectra_Metadata_Huntington_rep3.csv",sep="")
 write.table(meta,file = fileNameKW,sep=",")
+
+## Grouping Data by Species ##
+acronym <- unique(meta$Acronym) #Get unique listing of acronyms
+avgSpectra <- vector() #empty vector that will hold averaged species spectra (all samples into one spectrum)
+for(a in acronym){ #Loop through acronyms
+  temp <- data.frame(spectra[which(meta$Acronym %in% a),2:ncol(spectra)])
+  avgSpectra <- rbind(avgSpectra,colMeans(temp)) #add to avgSpectra variable
+}
+
+fileName <- paste(directory,"Nicolet_Averaged_Spectra_Huntington_species.csv",sep="") #create filename that will hold kw test results
+write.table(avgSpectra,file = fileName,sep=",")#write header to file
 ###-----END----------------------------------------------------------------------------------------------------------------------- ###

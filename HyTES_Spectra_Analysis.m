@@ -31,26 +31,17 @@ for a = 1:length(acronym)
     stdSpectra(a,:) = std(spectra(:,[2:203]));   
 end
 
-%% F-Ratio
-fratio = zeros(1,length(wavelengths));
-pAll = [];
-for b = 2: length(wavelengths)
-    [d,p,stats] = manova1(cell2mat(allSpectra(:,b)),allMeta(:,3));
-    fratio(b) = stats.W/stats.B;
-    pAll = vertcat(p, pAll);
-end
-fratio = 1./fratio; %now low fratio = less important wavelengths
-%% Plot F-Ratio Results
-figure('units','normalized','outerposition',[0 0 1 1])
-hold on
-plot(wavelengths,fratio)
-set(gca,'Xlim',[8 11.5],'Ylim',[0 1],'YTick',[0:0.25:1],'XTick',[8:0.5:11.5]) %
-set(gca,'FontSize',30)
-set(gca,'Fontname','Calibri')
-xlabel(['Wavelength ( \mum )']) % label x-axis
-ylabel('F-ratio') % label left y-axis
-hold off
+%% Display species spectra
 
+for a = 1:length(acronym)
+    figure('units','normalized','outerposition',[0 0 1 1])
+    y = cell2mat(allSpectra(strcmp(allMeta(:,3),acronym(a)),[2:203]))';
+    x = repmat(wavelengths,size(y,2),1)';
+    line(x,y);
+    text(8.02,0.99,num2str(size(y,2)));
+    axis([8 11.6 0.85 1])
+    title(acronym(a));
+end
 %% Histogram
 figure('units','normalized','outerposition',[0 0 0.85 1])
 hold on
@@ -60,9 +51,8 @@ ax1 = gca; %current axis
 AxesHandle = findobj(gcf,'Type','axes');
 ax1_pos = get(AxesHandle,'Position'); % position of first axes
 ax2 = axes('Position',ax1_pos,'YAxisLocation','right','Color','none');
-histogram(cell2mat(allDunn),'FaceColor','b','Parent',ax1) %,'Parent',ax2
+histogram(cell2mat(allDunn),'FaceColor',[0/255 0/255 153/255],'Parent',ax1) %
 
-%input = 100- mean(cell2mat(allSpectra(:,[2:size(allSpectra,2)])));
 input = cell2mat(allSpectra(13,[2:size(allSpectra,2)]));
 line(wavelengths,input,'Color','r','LineWidth',1.5,'Parent',ax2)
 
@@ -73,4 +63,17 @@ ylabel(ax1,'Frequency') % label left y-axis
 ylabel(ax2,'Emissivity') % label left y-axis
 set(ax1, 'FontSize',30)
 set(ax2, 'FontSize',30)
+hold off
+
+%% Histogram without Emissivity
+figure('units','normalized','outerposition',[0 0 0.85 1])
+hold on
+
+%Create a second axes in the same location as the first axes by setting the position of the second axes equal to the position of the first axes. 
+histogram(cell2mat(allDunn),'FaceColor',[0/255 0/255 153/255]) %
+
+set(gca,'Xlim',[8 11.6],'XTick',[8:.5:12]) %,'Ylim',[0 ],'YTick',[0:0.01: 0.06]
+xlabel(['Wavelength ( \mum )']) % label x-axis
+ylabel('Frequency') % label left y-axis
+set(gca, 'FontSize',30)
 hold off

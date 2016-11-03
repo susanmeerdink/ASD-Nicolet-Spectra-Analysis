@@ -7,7 +7,7 @@
 % spectra process: averaged spectra and standard deviation.
 % This code will analyze the spectra to determine similarities and differences.
 %% Import Data
-directory = 'F:\\Dropbox\\Analysis\\JPL Analysis\\HyTES ROI spectra\\'; %Home directory
+directory = 'F:\\Dropbox\\Analysis\\JPL Analysis\\HyTES spectra\\'; %Home directory
 dataFile = strcat(directory,'HyTES_Spectra_20161101.csv'); %Set to spectra file location
 metaFile = strcat(directory,'HyTES_Metadata_20161101.csv'); %Set to metadata file location
 data = readtable(dataFile); %Read in the averaged and std of spectra

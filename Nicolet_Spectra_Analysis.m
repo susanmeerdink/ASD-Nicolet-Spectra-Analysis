@@ -132,5 +132,20 @@ xlabel(['Wavelength ( \mum )']) % label x-axis
 ylabel('Frequency') % label left y-axis
 set(gca, 'FontSize',30)
 hold off
+
+%% Brewer Colors
+red = [228 26 28] ./ 255;
+blue = [55 126 184] ./ 255;
+green = [77 175 74] ./ 255;
+purple = [152 78 163] ./ 255;
+orange = [255 127 0] ./ 255;
+
+%% Least Separable Species
+allPairs = vertcat(pairs(:,2),pairs(:,3));
+[p1 p2 p3] = unique(allPairs);
+d = hist(p3, length(p1));
+
+
+%% Most Separable Species
 %% END
 close all

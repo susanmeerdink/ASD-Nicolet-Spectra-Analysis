@@ -80,25 +80,8 @@ blue = [55 126 184] ./ 255;
 green = [77 175 74] ./ 255;
 purple = [152 78 163] ./ 255;
 orange = [255 127 0] ./ 255;
-%% figures for only 5 species - POSTER
-close all
-figure('units','normalized','outerposition',[0 0 1 1])
-hold on
-plot(wavelengths,avgSpectra(strcmp(acronym,'BATU'),:),'Color',red,'LineWidth',1.5)
-plot(wavelengths,avgSpectra(strcmp(acronym,'CALE'),:),'Color',blue,'LineWidth',1.5)
-plot(wavelengths,avgSpectra(strcmp(acronym,'JAMI'),:),'Color',green,'LineWidth',1.5)
-plot(wavelengths,avgSpectra(strcmp(acronym,'POGR'),:),'Color',purple,'LineWidth',1.5)
-plot(wavelengths,avgSpectra(strcmp(acronym,'TITI'),:),'Color',orange,'LineWidth',1.5)
-set(gca,'FontSize',24,'FontName','Cambria')
-xlabel(['Wavelength ( \mum )']) % label x-axis
-ylabel('Emissivity')
-set(gca,'Xlim',[8 11.5],'XTick',[8:.5:11.5])
-set(gca,'Ylim',[.85 1],'YTick',[.85:.03:1.0])
-set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
-set(gca,'ygrid','on')
-hold off
 
-%% testing figures for only 5 species - POSTER
+%% figures for only 5 species - POSTER
 %close all
 figure('units','normalized','outerposition',[0 0 1 1])
 hold on

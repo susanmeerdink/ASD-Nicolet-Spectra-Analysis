@@ -73,30 +73,83 @@ for a = 1:length(acronym)
     set(gca,'FontSize',24);
     title(acronym(a));
 end
+%% Brewer Colors
+red = [228 26 28] ./ 255;
+blue = [55 126 184] ./ 255;
+green = [77 175 74] ./ 255;
+purple = [152 78 163] ./ 255;
+orange = [255 127 0] ./ 255;
+%% figures for only 5 species - POSTER
+close all
+figure('units','normalized','outerposition',[0 0 1 1])
+hold on
+plot(wavelengths,avgSpectra(strcmp(species,'BATU'),:),'Color',red,'LineWidth',1.5)
+plot(wavelengths,avgSpectra(strcmp(species,'CALE'),:),'Color',blue,'LineWidth',1.5)
+plot(wavelengths,avgSpectra(strcmp(species,'JAMI'),:),'Color',green,'LineWidth',1.5)
+plot(wavelengths,avgSpectra(strcmp(species,'POGR'),:),'Color',purple,'LineWidth',1.5)
+plot(wavelengths,avgSpectra(strcmp(species,'TITI'),:),'Color',orange,'LineWidth',1.5)
+set(gca,'FontSize',24,'FontName','Cambria')
+xlabel(['Wavelength ( \mum )']) % label x-axis
+ylabel('Emissivity')
+set(gca,'Xlim',[2.5 15],'XTick',[2.5:2.5:15])
+set(gca,'Ylim',[.85 1],'YTick',[.85:.03:1.0])
+set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
+set(gca,'ygrid','on')
+hold off
+
+%% testing figures for only 5 species - POSTER
+%close all
+figure('units','normalized','outerposition',[0 0 1 1])
+hold on
+plot(wavelengths,avgSpectra(strcmp(species,'BATU'),:),'Color',red,'LineWidth',1.5)
+plot(wavelengths,avgSpectra(strcmp(species,'JAMI'),:),'Color',blue,'LineWidth',1.5)
+plot(wavelengths,avgSpectra(strcmp(species,'MAGR'),:),'Color',green,'LineWidth',1.5)
+plot(wavelengths,avgSpectra(strcmp(species,'PEAF'),:),'Color',purple,'LineWidth',1.5)
+plot(wavelengths,avgSpectra(strcmp(species,'QURO'),:),'Color',orange,'LineWidth',1.5)
+set(gca,'FontSize',24,'FontName','Cambria')
+xlabel(['Wavelength ( \mum )']) % label x-axis
+ylabel('Emissivity')
+set(gca,'Xlim',[2.5 15],'XTick',[2.5:2.5:15])
+set(gca,'Ylim',[.85 1],'YTick',[.85:.03:1.0])
+set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
+set(gca,'ygrid','on')
+hold off
+%% Testing Normality
+norm = [];
+for w = 1:size(wavelengths,2) %loopthrough wavelengths
+    [H, pVal, W] = swtest(repSpectra(:,w));
+    norm = vertcat(norm,pVal);
+end
+%Definitely not normal - all negatively skewed
 %% Kruskal Wallis Test and Dunn Post Hoc Test
 close all
 pValue = []; %Empty array to hold pvalues from kruskal wallis
 pairs = []; %empty array to hold results from dunn test
-for w = 1:size(wavelengths,2) %loopthrough wavelengths
+for w = 1:1%size(wavelengths,2) %loopthrough wavelengths
     [p,tbl,stats] = kruskalwallis(repSpectra(:,(w)),repMetadata(:,2),'off');
     pValue = vertcat(pValue,[wavelengths(w),p]);
     
-    if p < 0.05 %if that wavelength is statistically significant, do post hoc test
-        c = multcompare(stats,'CType','dunn-sidak','Display','off');
-        for i = 1:size(c,1) %loop through resulting pairs
-            if c(i,6) < 0.05 %if the pair is significantly different add
-                input = [wavelengths(w),stats.gnames(c(i,1)),stats.gnames(c(i,2)),c(i,6)];
-                pairs = vertcat(pairs, input);    
-            end
-        end
-    end
+%     if p < 0.05 %if that wavelength is statistically significant, do post hoc test
+%         c = multcompare(stats,'CType','dunn-sidak','Display','off');
+%         for i = 1:size(c,1) %loop through resulting pairs
+%             if c(i,6) < 0.05 %if the pair is significantly different add
+%                 input = [wavelengths(w),stats.gnames(c(i,1)),stats.gnames(c(i,2)),c(i,6)];
+%                 pairs = vertcat(pairs, input);    
+%             end
+%         end
+%     end
+
+    dv = abs(bsxfun(@minus,stats.meanranks,stats.meanranks'));% Absolute pairwise diifferences
+    r = reshape(triu(dv),[1,729]);
+    r(find(r ==0)) = [];
+    
 end
 
 %Plot results
-hold on
-plot(pValue(:,1),pValue(:,2))
-%refline(0, 0.05);
-hold off
+% hold on
+% plot(pValue(:,1),pValue(:,2))
+% %refline(0, 0.05);
+% hold off
 %% Histogram
 figure('units','normalized','outerposition',[0 0 0.85 1])
 hold on
@@ -132,13 +185,6 @@ xlabel(['Wavelength ( \mum )']) % label x-axis
 ylabel('Frequency') % label left y-axis
 set(gca, 'FontSize',30)
 hold off
-
-%% Brewer Colors
-red = [228 26 28] ./ 255;
-blue = [55 126 184] ./ 255;
-green = [77 175 74] ./ 255;
-purple = [152 78 163] ./ 255;
-orange = [255 127 0] ./ 255;
 
 %% Least Separable Species
 allPairs = vertcat(pairs(:,2),pairs(:,3));

@@ -46,6 +46,20 @@ for a = 1:length(acronym)
     hold off
 end
 
+figure('units','normalized','outerposition',[0 0 .5 1])
+plot(wavelengths,avgSpectra((1:9),:))
+legend(acronym(1:9))
+axis([8 11.5 0.85 1])
+
+figure('units','normalized','outerposition',[0 0 .5 1])
+plot(wavelengths,avgSpectra((10:18),:))
+legend(acronym(10:18))
+axis([8 11.5 0.85 1])
+
+figure('units','normalized','outerposition',[0 0 .5 1])
+plot(wavelengths,avgSpectra((19:27),:))
+legend(acronym(19:27))
+axis([8 11.5 0.85 1])
 %% Display species spectra
 close all
 for a = 1:length(acronym)
@@ -60,24 +74,73 @@ for a = 1:length(acronym)
     set(gca,'FontSize',24);
     title(acronym(a));
 end
+%% Brewer Colors
+red = [228 26 28] ./ 255;
+blue = [55 126 184] ./ 255;
+green = [77 175 74] ./ 255;
+purple = [152 78 163] ./ 255;
+orange = [255 127 0] ./ 255;
+%% figures for only 5 species - POSTER
+close all
+figure('units','normalized','outerposition',[0 0 1 1])
+hold on
+plot(wavelengths,avgSpectra(strcmp(acronym,'BATU'),:),'Color',red,'LineWidth',1.5)
+plot(wavelengths,avgSpectra(strcmp(acronym,'CALE'),:),'Color',blue,'LineWidth',1.5)
+plot(wavelengths,avgSpectra(strcmp(acronym,'JAMI'),:),'Color',green,'LineWidth',1.5)
+plot(wavelengths,avgSpectra(strcmp(acronym,'POGR'),:),'Color',purple,'LineWidth',1.5)
+plot(wavelengths,avgSpectra(strcmp(acronym,'TITI'),:),'Color',orange,'LineWidth',1.5)
+set(gca,'FontSize',24,'FontName','Cambria')
+xlabel(['Wavelength ( \mum )']) % label x-axis
+ylabel('Emissivity')
+set(gca,'Xlim',[8 11.5],'XTick',[8:.5:11.5])
+set(gca,'Ylim',[.85 1],'YTick',[.85:.03:1.0])
+set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
+set(gca,'ygrid','on')
+hold off
+
+%% testing figures for only 5 species - POSTER
+%close all
+figure('units','normalized','outerposition',[0 0 1 1])
+hold on
+plot(wavelengths,avgSpectra(strcmp(acronym,'BATU'),:),'Color',red,'LineWidth',1.5)
+plot(wavelengths,avgSpectra(strcmp(acronym,'JAMI'),:),'Color',blue,'LineWidth',1.5)
+plot(wavelengths,avgSpectra(strcmp(acronym,'MAGR'),:),'Color',green,'LineWidth',1.5)
+plot(wavelengths,avgSpectra(strcmp(acronym,'PEAF'),:),'Color',purple,'LineWidth',1.5)
+plot(wavelengths,avgSpectra(strcmp(acronym,'QURO'),:),'Color',orange,'LineWidth',1.5)
+set(gca,'FontSize',24,'FontName','Cambria')
+xlabel(['Wavelength ( \mum )']) % label x-axis
+ylabel('Emissivity')
+set(gca,'Xlim',[8 11.5],'XTick',[8:.5:11.5])
+set(gca,'Ylim',[.85 1],'YTick',[.85:.03:1.0])
+set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
+set(gca,'ygrid','on')
+hold off
 %% Kruskal Wallis Test and Dunn Post Hoc Test
 close all
 pValue = []; %Empty array to hold pvalues from kruskal wallis
 pairs = []; %empty array to hold results from dunn test
-for w = 1:size(wavelengths,2) %loopthrough wavelengths
-    [p,tbl,stats] = kruskalwallis(allSpectra(:,(w+1)),allMeta(:,3),'off');
+norm = [];
+for w = 1:5%size(wavelengths,2) %loopthrough wavelengths
+    [p,tbl,stats] = kruskalwallis(allSpectra(:,(w+1)),allMeta(:,3)); %,'off'
     pValue = vertcat(pValue,[wavelengths(w),p]);
     
-    if p < 0.05 %if that wavelength is statistically significant, do post hoc test
-        c = multcompare(stats,'CType','dunn-sidak','Display','off');
-        for i = 1:size(c,1) %loop through resulting pairs
-            if c(i,6) < 0.05 %if the pair is significantly different add
-                input = [wavelengths(w),stats.gnames(c(i,1)),stats.gnames(c(i,2)),c(i,6)];
-                pairs = vertcat(pairs, input);    
-            end
-        end
-    end
+%     if p < 0.05 %if that wavelength is statistically significant, do post hoc test
+%         c = multcompare(stats,'CType','dunn-sidak','Display','off');
+%         for i = 1:size(c,1) %loop through resulting pairs
+%             if c(i,6) < 0.05 %if the pair is significantly different add
+%                 input = [wavelengths(w),stats.gnames(c(i,1)),stats.gnames(c(i,2)),c(i,6)];
+%                 pairs = vertcat(pairs, input);    
+%             end
+%         end
+%     end
+    
+    dv = abs(bsxfun(@minus,stats.meanranks,stats.meanranks'));% Absolute pairwise diifferences
+    r = reshape(triu(dv),[1,729]);
+    r(find(r ==0)) = [];
+    [H, pVal, W] = swtest(r);
+    norm = vertcat(norm,pVal); 
 end
+figure
 plot(pValue(:,1),pValue(:,2))
 %% Histogram
 figure('units','normalized','outerposition',[0 0 0.85 1])
@@ -114,5 +177,6 @@ xlabel(['Wavelength ( \mum )']) % label x-axis
 ylabel('Frequency') % label left y-axis
 set(gca, 'FontSize',30)
 hold off
+
 %% END
 close all

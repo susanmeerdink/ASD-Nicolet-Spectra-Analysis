@@ -84,13 +84,13 @@ orange = [255 127 0] ./ 255;
 close all
 figure('units','normalized','outerposition',[0 0 1 1])
 hold on
-plot(wavelengths,avgSpectra(strcmp(species,'BATU'),:),'Color',red,'LineWidth',1.5)
-plot(wavelengths,avgSpectra(strcmp(species,'JAMI'),:),'Color',blue,'LineWidth',1.5)
-plot(wavelengths,avgSpectra(strcmp(species,'MAGR'),:),'Color',green,'LineWidth',1.5)
-plot(wavelengths,avgSpectra(strcmp(species,'PEAF'),:),'Color',purple,'LineWidth',1.5)
-plot(wavelengths,avgSpectra(strcmp(species,'QURO'),:),'Color',orange,'LineWidth',1.5)
-set(gca,'FontSize',24,'FontName','Cambria')
-xlabel(['Wavelength ( \mum )']) % label x-axis
+plot(wavelengths,avgSpectra(strcmp(species,'BATU'),:),'Color',red,'LineWidth',2)
+plot(wavelengths,avgSpectra(strcmp(species,'JAMI'),:),'Color',blue,'LineWidth',2)
+plot(wavelengths,avgSpectra(strcmp(species,'MAGR'),:),'Color',green,'LineWidth',2)
+plot(wavelengths,avgSpectra(strcmp(species,'PEAF'),:),'Color',purple,'LineWidth',2)
+plot(wavelengths,avgSpectra(strcmp(species,'QURO'),:),'Color',orange,'LineWidth',2)
+set(gca,'FontSize',40,'FontName','Cambria')
+xlabel(['Wavelength (\mum)']) % label x-axis
 ylabel('Emissivity')
 set(gca,'Xlim',[2.5 15],'XTick',[2.5:2.5:15])
 set(gca,'Ylim',[.85 1],'YTick',[.85:.03:1.0])
@@ -169,12 +169,15 @@ ylabel('Frequency') % label left y-axis
 set(gca, 'FontSize',30)
 hold off
 
-%% Least Separable Species
+%% Separable Species
 allPairs = vertcat(pairs(:,2),pairs(:,3));
 [p1 p2 p3] = unique(allPairs);
 d = hist(p3, length(p1));
+[sorted,indexSorted] = sort(d);
 
+figure('units','normalized','outerposition',[0 0 1 1])
+bar(sorted)
+set(gca,'XTick',1:1:27,'XTickLabel',acronym(indexSorted));
 
-%% Most Separable Species
 %% END
 close all

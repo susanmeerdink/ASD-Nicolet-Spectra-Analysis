@@ -85,13 +85,13 @@ orange = [255 127 0] ./ 255;
 %close all
 figure('units','normalized','outerposition',[0 0 1 1])
 hold on
-plot(wavelengths,avgSpectra(strcmp(acronym,'BATU'),:),'Color',red,'LineWidth',1.5)
-plot(wavelengths,avgSpectra(strcmp(acronym,'JAMI'),:),'Color',blue,'LineWidth',1.5)
-plot(wavelengths,avgSpectra(strcmp(acronym,'MAGR'),:),'Color',green,'LineWidth',1.5)
-plot(wavelengths,avgSpectra(strcmp(acronym,'PEAF'),:),'Color',purple,'LineWidth',1.5)
-plot(wavelengths,avgSpectra(strcmp(acronym,'QURO'),:),'Color',orange,'LineWidth',1.5)
-set(gca,'FontSize',24,'FontName','Cambria')
-xlabel(['Wavelength ( \mum )']) % label x-axis
+plot(wavelengths,avgSpectra(strcmp(acronym,'BATU'),:),'Color',red,'LineWidth',2)
+plot(wavelengths,avgSpectra(strcmp(acronym,'JAMI'),:),'Color',blue,'LineWidth',2)
+plot(wavelengths,avgSpectra(strcmp(acronym,'MAGR'),:),'Color',green,'LineWidth',2)
+plot(wavelengths,avgSpectra(strcmp(acronym,'PEAF'),:),'Color',purple,'LineWidth',2)
+plot(wavelengths,avgSpectra(strcmp(acronym,'QURO'),:),'Color',orange,'LineWidth',2)
+set(gca,'FontSize',40,'FontName','Cambria')
+xlabel(['Wavelength (\mum)']) % label x-axis
 ylabel('Emissivity')
 set(gca,'Xlim',[8 11.5],'XTick',[8:.5:11.5])
 set(gca,'Ylim',[.85 1],'YTick',[.85:.03:1.0])
@@ -103,8 +103,8 @@ close all
 pValue = []; %Empty array to hold pvalues from kruskal wallis
 pairs = []; %empty array to hold results from dunn test
 norm = [];
-for w = 1:5%size(wavelengths,2) %loopthrough wavelengths
-    [p,tbl,stats] = kruskalwallis(allSpectra(:,(w+1)),allMeta(:,3)); %,'off'
+for w = 1:size(wavelengths,2) %loopthrough wavelengths
+    [p,tbl,stats] = kruskalwallis(allSpectra(:,(w+1)),allMeta(:,3),'off'); %
     pValue = vertcat(pValue,[wavelengths(w),p]);
     
 %     if p < 0.05 %if that wavelength is statistically significant, do post hoc test
@@ -117,11 +117,31 @@ for w = 1:5%size(wavelengths,2) %loopthrough wavelengths
 %         end
 %     end
     
-    dv = abs(bsxfun(@minus,stats.meanranks,stats.meanranks'));% Absolute pairwise diifferences
-    r = reshape(triu(dv),[1,729]);
+    diff = abs(bsxfun(@minus,stats.meanranks,stats.meanranks'));% Absolute pairwise diifferences
+    r = reshape(triu(diff),[1,729]);
     r(find(r ==0)) = [];
     [H, pVal, W] = swtest(r);
+%     figure
+%     hist(r)
     norm = vertcat(norm,pVal); 
+    
+    %Multiple comparision test
+    zScore = @(p) sqrt(2) * erfcinv(p*2);
+    nSamples = size(allSpectra,1); %number of samples
+    n2 = bsxfun(@plus,(1./stats.n),(1./stats.n)');
+    n1 = (nSamples*(nSamples+1))/12;
+    n3 = sqrt(n1*n2);
+    
+    nGroups = size(stats.gnames,1); %number of groups
+    p = 0.05/(nGroups*(nGroups-1));
+    z = zScore(p);
+    compare = z.*n3;
+    
+    result = diff>compare;
+    [row,col] = find(triu(result) == 1);
+    
+    input = [repmat(wavelengths(w),[1,size(row,1)])',row,col];
+	pairs = vertcat(pairs, input); 
 end
 figure
 plot(pValue(:,1),pValue(:,2))
@@ -134,7 +154,7 @@ ax1 = gca; %current axis
 AxesHandle = findobj(gcf,'Type','axes');
 ax1_pos = get(AxesHandle,'Position'); % position of first axes
 ax2 = axes('Position',ax1_pos,'YAxisLocation','right','Color','none');
-histogram(cell2mat(pairs(:,1)),'FaceColor',[0/255 0/255 153/255],'Parent',ax1) %
+histogram(pairs(:,1),'FaceColor',blue,'Parent',ax1) %cell2mat(
 
 input = allSpectra(13,[2:size(allSpectra,2)]);
 line(wavelengths,input,'Color','r','LineWidth',1.5,'Parent',ax2)
@@ -153,7 +173,7 @@ figure('units','normalized','outerposition',[0 0 0.85 1])
 hold on
 
 %Create a second axes in the same location as the first axes by setting the position of the second axes equal to the position of the first axes. 
-histogram(cell2mat(pairs(:,1)),'FaceColor',[0/255 0/255 153/255]) %
+histogram(pairs(:,1),'FaceColor',blue) %cell2mat(
 
 set(gca,'Xlim',[8 11.6],'XTick',[8:.5:12]) %,'Ylim',[0 ],'YTick',[0:0.01: 0.06]
 xlabel(['Wavelength ( \mum )']) % label x-axis
@@ -161,5 +181,14 @@ ylabel('Frequency') % label left y-axis
 set(gca, 'FontSize',30)
 hold off
 
+%% Separable Species
+allPairs = vertcat(pairs(:,2),pairs(:,3));
+[p1 p2 p3] = unique(allPairs);
+d = hist(p3, length(p1));
+[sorted,indexSorted] = sort(d);
+
+figure('units','normalized','outerposition',[0 0 1 1])
+bar(sorted)
+set(gca,'XTick',1:1:27,'XTickLabel',acronym(indexSorted));
 %% END
 close all

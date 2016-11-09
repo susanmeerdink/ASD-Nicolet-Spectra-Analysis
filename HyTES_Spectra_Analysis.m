@@ -107,40 +107,30 @@ for w = 1:size(wavelengths,2) %loopthrough wavelengths
     [p,tbl,stats] = kruskalwallis(allSpectra(:,(w+1)),allMeta(:,3),'off'); %
     pValue = vertcat(pValue,[wavelengths(w),p]);
     
-%     if p < 0.05 %if that wavelength is statistically significant, do post hoc test
-%         c = multcompare(stats,'CType','dunn-sidak','Display','off');
-%         for i = 1:size(c,1) %loop through resulting pairs
-%             if c(i,6) < 0.05 %if the pair is significantly different add
-%                 input = [wavelengths(w),stats.gnames(c(i,1)),stats.gnames(c(i,2)),c(i,6)];
-%                 pairs = vertcat(pairs, input);    
-%             end
-%         end
-%     end
-    
+    %Multiple comparision test
+    %based on seigel and castellan 1988 pg 213
     diff = abs(bsxfun(@minus,stats.meanranks,stats.meanranks'));% Absolute pairwise diifferences
+    
+    %plotting to look at histogram to determine if it normal
     r = reshape(triu(diff),[1,729]);
     r(find(r ==0)) = [];
-    [H, pVal, W] = swtest(r);
-%     figure
-%     hist(r)
-    norm = vertcat(norm,pVal); 
-    
-    %Multiple comparision test
-    zScore = @(p) sqrt(2) * erfcinv(p*2);
+    figure
+    hist(r)
+  
+    zScore = @(p) sqrt(2) * erfcinv(p*2); %calculate z score from p value
     nSamples = size(allSpectra,1); %number of samples
-    n2 = bsxfun(@plus,(1./stats.n),(1./stats.n)');
-    n1 = (nSamples*(nSamples+1))/12;
-    n3 = sqrt(n1*n2);
-    
     nGroups = size(stats.gnames,1); %number of groups
-    p = 0.05/(nGroups*(nGroups-1));
-    z = zScore(p);
-    compare = z.*n3;
+    n1 = (nSamples*(nSamples+1))/12;
+    n2 = bsxfun(@plus,(1./stats.n),(1./stats.n)'); 
+    n3 = sqrt(n1*n2);
+    p = 0.05/(nGroups*(nGroups-1)); %calculate the p value
+    z = zScore(p); %get the zscore of the pvalue
+    compare = z.*n3; %Critical value to compare the mean rank differences
+    result = diff >= compare; %determine where the mean rank is larger than or equal to the critical value
+    [row,col] = find(triu(result) == 1); %get the row (group1) and column (group2) of the significantly different pairs
     
-    result = diff>compare;
-    [row,col] = find(triu(result) == 1);
-    
-    input = [repmat(wavelengths(w),[1,size(row,1)])',row,col];
+    %Save the significantly different groups with the wavelength
+    input = [repmat(wavelengths(w),[1,size(row,1)])',row,col]; 
 	pairs = vertcat(pairs, input); 
 end
 figure

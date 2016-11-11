@@ -104,43 +104,48 @@ for w = 1:size(wavelengths,2) %loopthrough wavelengths
     norm = vertcat(norm,pVal);
 end
 %Definitely not normal - all negatively skewed
-%% Kruskal Wallis Test and Dunn Post Hoc Test
+%% Non Parametric Tests
 close all
-pValue = []; %Empty array to hold pvalues from kruskal wallis
-pairs = []; %empty array to hold results from dunn test
-norm  = [];
-for w = 1:10%size(wavelengths,2) %loopthrough wavelengths
-    [p,tbl,stats] = kruskalwallis(repSpectra(:,(w)),repMetadata(:,2),'off'); %Calculate kruskal wallis
-    pValue = vertcat(pValue,[wavelengths(w),p]); %pull out p-value
-    
-    %Multiple comparision test
-    %based on seigel and castellan 1988 pg 213
-    diff = abs(bsxfun(@minus,stats.meanranks,stats.meanranks'));% Absolute pairwise diifferences
-    
-    %plotting to look at histogram to determine if it normal
-    r = reshape(triu(diff),[1,729]);
-    r(find(r ==0)) = [];
-    figure
-    hist(r)
-  
-    zScore = @(p) sqrt(2) * erfcinv(p*2); %calculate z score from p value
-    nSamples = size(allSpectra,1); %number of samples
-    nGroups = size(stats.gnames,1); %number of groups
-    n1 = (nSamples*(nSamples+1))/12;
-    n2 = bsxfun(@plus,(1./stats.n),(1./stats.n)'); 
-    n3 = sqrt(n1*n2);
-    p = 0.05/(nGroups*(nGroups-1)); %calculate the p value
-    z = zScore(p); %get the zscore of the pvalue
-    compare = z.*n3; %Critical value to compare the mean rank differences
-    result = diff >= compare; %determine where the mean rank is larger than or equal to the critical value
-    [row,col] = find(triu(result) == 1); %get the row (group1) and column (group2) of the significantly different pairs
-    
-    %Save the significantly different groups with the wavelength
-    input = [repmat(wavelengths(w),[1,size(row,1)])',row,col]; 
-	pairs = vertcat(pairs, input); 
-    
+
+% Get the pair order
+n = size(species,1);
+[a,b] = meshgrid(1:n, 1:n);
+mask   = triu(ones(n), 1) > 0.5;
+pairs  = [a(mask) b(mask)];
+
+pValue = []; %Empty array to hold pvalues from mann - whitney u test
+results = [];
+results(:,1:2) = pairs; %add onto this array with pvalue results
+
+for w = 1:size(wavelengths,2) %loopthrough wavelengths
+    for i = 1: size(pairs,1) %loop through the pair list
+        g1Index = strmatch(char(species(pairs(i,1))),repMetadata(:,2));
+        g2Index = strmatch(char(species(pairs(i,2))),repMetadata(:,2));
+        g1 = repSpectra(g1Index,w);
+        g2 = repSpectra(g2Index,w);
+        p = ranksum(g1,g2);
+        results(i,2+w) = p;
+    end 
 end
 
+%% Coding up Results
+waveSummary = results(:,3:1740) < 0.05; %mark the values with a 1 if they are less then 0.05
+waveTotal = sum(waveSummary,1); %get the total number of pairs that were significantly different at that wavelength
+waveList = [];
+for l = 1:size(wavelengths,2)
+    add = repmat(wavelengths(l),[waveTotal(l),1]);
+    waveList = vertcat(waveList,add);
+end
+
+pairTotal = sum(waveSummary,2); %get the total number of times a pair shows up
+pairList = [];
+for l = 1: size(pairTotal,1)
+    n1 = species(pairs(l,1));
+    n2 = species(pairs(l,2));
+    add1 = repmat(n1,[pairTotal(l),1]);
+    add2 = repmat(n2,[pairTotal(l),1]);
+    pairList = vertcat(pairList,add1,add2);
+end
 %% Histogram
 figure('units','normalized','outerposition',[0 0 0.85 1])
 hold on
@@ -150,7 +155,7 @@ ax1 = gca; %current axis
 AxesHandle = findobj(gcf,'Type','axes');
 ax1_pos = get(AxesHandle,'Position'); % position of first axes
 ax2 = axes('Position',ax1_pos,'YAxisLocation','right','Color','none');
-histogram(cell2mat(pairs(:,1)),'FaceColor',[0/255 0/255 153/255],'Parent',ax1) %
+histogram(waveList,'FaceColor',blue,'Parent',ax1) %
 
 input = mean(avgSpectra);
 line(wavelengths,input,'Color','r','LineWidth',1.5,'Parent',ax2)
@@ -169,7 +174,7 @@ figure('units','normalized','outerposition',[0 0 0.85 1])
 hold on
 
 %Create a second axes in the same location as the first axes by setting the position of the second axes equal to the position of the first axes. 
-histogram(cell2mat(pairs(:,1)),'FaceColor',blue) %
+histogram(waveList,'FaceColor',blue) %
 
 set(gca,'Xlim',[2.5 15],'XTick',[2.5:2.5:15]) %,'Ylim',[0 ],'YTick',[0:0.01: 0.06]
 xlabel(['Wavelength ( \mum )']) % label x-axis
@@ -178,14 +183,12 @@ set(gca, 'FontSize',30)
 hold off
 
 %% Separable Species
-allPairs = vertcat(pairs(:,2),pairs(:,3));
-[p1 p2 p3] = unique(allPairs);
+[p1, p2, p3] = unique(pairList);
 d = hist(p3, length(p1));
 [sorted,indexSorted] = sort(d);
 
 figure('units','normalized','outerposition',[0 0 1 1])
 bar(sorted)
-set(gca,'XTick',1:1:27,'XTickLabel',acronym(indexSorted));
-
+set(gca,'XTick',1:1:27,'XTickLabel',species(indexSorted));
 %% END
 close all

@@ -97,13 +97,7 @@ set(gca,'Ylim',[.85 1],'YTick',[.85:.03:1.0])
 set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
 set(gca,'ygrid','on')
 hold off
-%% Testing Normality
-norm = [];
-for w = 1:size(wavelengths,2) %loopthrough wavelengths
-    [H, pVal, W] = swtest(repSpectra(:,w));
-    norm = vertcat(norm,pVal);
-end
-%Definitely not normal - all negatively skewed
+
 %% Non Parametric Tests
 close all
 

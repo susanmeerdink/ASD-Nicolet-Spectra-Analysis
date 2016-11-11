@@ -180,9 +180,50 @@ hold off
 [p1, p2, p3] = unique(pairList);
 d = hist(p3, length(p1));
 [sorted,indexSorted] = sort(d);
+sortedSpecies = species(indexSorted);
 
 figure('units','normalized','outerposition',[0 0 1 1])
 bar(sorted)
-set(gca,'XTick',1:1:27,'XTickLabel',species(indexSorted));
+set(gca,'XTick',1:1:27,'XTickLabel',sortedSpecies);
+%% Plotting least separable species
+close all
+figure('units','normalized','outerposition',[0 0 1 1])
+hold on
+plot(wavelengths,avgSpectra(strcmp(species,sortedSpecies(1)),:),'Color',red,'LineWidth',2)
+plot(wavelengths,avgSpectra(strcmp(species,sortedSpecies(2)),:),'Color',blue,'LineWidth',2)
+plot(wavelengths,avgSpectra(strcmp(species,sortedSpecies(3)),:),'Color',green,'LineWidth',2)
+plot(wavelengths,avgSpectra(strcmp(species,sortedSpecies(4)),:),'Color',purple,'LineWidth',2)
+set(gca,'FontSize',40,'FontName','Cambria')
+xlabel(['Wavelength (\mum)']) % label x-axis
+ylabel('Emissivity')
+set(gca,'Xlim',[2.5 15],'XTick',[2.5:2.5:15])
+set(gca,'Ylim',[.85 1],'YTick',[.85:.03:1.0])
+set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
+set(gca,'ygrid','on')
+hold off
+
+set(gcf,'PaperPositionMode','auto')
+nameFile = strcat(directory,'\\Figures\\Nicolet_least_separable');
+print(nameFile,'-dpng','-r0')
+%% Plotting most separable species
+close all
+figure('units','normalized','outerposition',[0 0 1 1])
+hold on
+plot(wavelengths,avgSpectra(strcmp(species,sortedSpecies(27)),:),'Color',red,'LineWidth',2)
+plot(wavelengths,avgSpectra(strcmp(species,sortedSpecies(26)),:),'Color',blue,'LineWidth',2)
+plot(wavelengths,avgSpectra(strcmp(species,sortedSpecies(25)),:),'Color',green,'LineWidth',2)
+plot(wavelengths,avgSpectra(strcmp(species,sortedSpecies(24)),:),'Color',purple,'LineWidth',2)
+set(gca,'FontSize',40,'FontName','Cambria')
+xlabel(['Wavelength (\mum)']) % label x-axis
+ylabel('Emissivity')
+set(gca,'Xlim',[2.5 15],'XTick',[2.5:2.5:15])
+set(gca,'Ylim',[.85 1],'YTick',[.85:.03:1.0])
+set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
+set(gca,'ygrid','on')
+hold off
+
+set(gcf,'PaperPositionMode','auto')
+nameFile = strcat(directory,'\\Figures\\Nicolet_most_separable');
+print(nameFile,'-dpng','-r0')
 %% END
 close all

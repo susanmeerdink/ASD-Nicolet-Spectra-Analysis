@@ -3,6 +3,7 @@
 *.png
 *.xlsx
 *.asv
+*.html
 
 # Windows image file caches
 Thumbs.db

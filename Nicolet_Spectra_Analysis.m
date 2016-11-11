@@ -89,7 +89,7 @@ plot(wavelengths,avgSpectra(strcmp(species,'JAMI'),:),'Color',blue,'LineWidth',2
 plot(wavelengths,avgSpectra(strcmp(species,'MAGR'),:),'Color',green,'LineWidth',2)
 plot(wavelengths,avgSpectra(strcmp(species,'PEAF'),:),'Color',purple,'LineWidth',2)
 plot(wavelengths,avgSpectra(strcmp(species,'QURO'),:),'Color',orange,'LineWidth',2)
-set(gca,'FontSize',40,'FontName','Cambria')
+set(gca,'FontSize',24,'FontName','Cambria')
 xlabel(['Wavelength (\mum)']) % label x-axis
 ylabel('Emissivity')
 set(gca,'Xlim',[2.5 15],'XTick',[2.5:2.5:15])
@@ -98,7 +98,7 @@ set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
 set(gca,'ygrid','on')
 hold off
 
-set(gcf,'PaperPositionMode','auto')
+set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.5 4])
 nameFile = strcat(directory,'\\Figures\\Nicolet_species_sample');
 print(nameFile,'-dpng','-r0')
 
@@ -168,18 +168,22 @@ set(ax2, 'FontSize',30)
 hold off
 
 %% Histogram without Emissivity
-figure('units','normalized','outerposition',[0 0 0.85 1])
+figure('units','normalized','outerposition',[0 0 1 1])
 hold on
 
 %Create a second axes in the same location as the first axes by setting the position of the second axes equal to the position of the first axes. 
-histogram(waveList,'FaceColor',blue) %
+histogram(waveList,'FaceColor',red) %
 
-set(gca,'Xlim',[2.5 15],'XTick',[2.5:2.5:15]) %,'Ylim',[0 ],'YTick',[0:0.01: 0.06]
+set(gca,'Xlim',[2.25 15],'XTick',[2.5:2.5:15]) %,'Ylim',[0 ],'YTick',[0:0.01: 0.06]
 xlabel(['Wavelength ( \mum )']) % label x-axis
 ylabel('Frequency') % label left y-axis
-set(gca, 'FontSize',30)
+set(gca,'FontSize',24,'FontName','Cambria')
 hold off
 
+set(gca,'YTickMode','manual','YLimMode','manual');
+set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.5 4.2])
+nameFile = strcat(directory,'\\Figures\\Nicolet_influential_wavelengths');
+print(nameFile,'-dpng','-r0')
 %% Separable Species
 [p1, p2, p3] = unique(pairList);
 d = hist(p3, length(p1));
@@ -197,7 +201,7 @@ plot(wavelengths,avgSpectra(strcmp(species,sortedSpecies(1)),:),'Color',red,'Lin
 plot(wavelengths,avgSpectra(strcmp(species,sortedSpecies(2)),:),'Color',blue,'LineWidth',2)
 plot(wavelengths,avgSpectra(strcmp(species,sortedSpecies(3)),:),'Color',green,'LineWidth',2)
 plot(wavelengths,avgSpectra(strcmp(species,sortedSpecies(4)),:),'Color',purple,'LineWidth',2)
-set(gca,'FontSize',40,'FontName','Cambria')
+set(gca,'FontSize',24,'FontName','Cambria')
 xlabel(['Wavelength (\mum)']) % label x-axis
 ylabel('Emissivity')
 set(gca,'Xlim',[2.5 15],'XTick',[2.5:2.5:15])
@@ -206,7 +210,7 @@ set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
 set(gca,'ygrid','on')
 hold off
 
-set(gcf,'PaperPositionMode','auto')
+set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.5 4])
 nameFile = strcat(directory,'\\Figures\\Nicolet_least_separable');
 print(nameFile,'-dpng','-r0')
 %% Plotting most separable species
@@ -217,7 +221,7 @@ plot(wavelengths,avgSpectra(strcmp(species,sortedSpecies(27)),:),'Color',red,'Li
 plot(wavelengths,avgSpectra(strcmp(species,sortedSpecies(26)),:),'Color',blue,'LineWidth',2)
 plot(wavelengths,avgSpectra(strcmp(species,sortedSpecies(25)),:),'Color',green,'LineWidth',2)
 plot(wavelengths,avgSpectra(strcmp(species,sortedSpecies(24)),:),'Color',purple,'LineWidth',2)
-set(gca,'FontSize',40,'FontName','Cambria')
+set(gca,'FontSize',24,'FontName','Cambria')
 xlabel(['Wavelength (\mum)']) % label x-axis
 ylabel('Emissivity')
 set(gca,'Xlim',[2.5 15],'XTick',[2.5:2.5:15])
@@ -226,7 +230,7 @@ set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
 set(gca,'ygrid','on')
 hold off
 
-set(gcf,'PaperPositionMode','auto')
+set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.5 4])
 nameFile = strcat(directory,'\\Figures\\Nicolet_most_separable');
 print(nameFile,'-dpng','-r0')
 %% END

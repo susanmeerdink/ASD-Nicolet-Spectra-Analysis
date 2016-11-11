@@ -98,6 +98,10 @@ set(gca,'Ylim',[.85 1],'YTick',[.85:.03:1.0])
 set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
 set(gca,'ygrid','on')
 hold off
+
+set(gcf,'PaperPositionMode','auto')
+nameFile = strcat(directory,'\\Figures\\HyTES_species_sample');
+print(nameFile,'-dpng','-r0')
 %% Non Parametric Tests
 close all
 

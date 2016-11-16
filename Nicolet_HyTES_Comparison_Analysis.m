@@ -4,7 +4,7 @@
 % This code reads in Nicolet and HyTES spectra.
 % This code will analyze the spectra at the leaf and canopy level 
 % to determine similarities and differences.
-
+% run on Matlab 2016B
 %% Load Data
 
 %Read in Nicolet (leaf level) data
@@ -56,11 +56,21 @@ end
 %% Plots for Comparison
 
 for a = 1:size(species,1) %loop through species
-    %Zoomed Out
+    %Zoomed Out Image
     figure('units','normalized','outerposition',[0 0 1 1])
     hold on
+    
+    %Plotting Nicolet
+    p = area(waveNicolet, avgSpecNicolet(a,:)+stdSpecNicolet(a,:),'FaceColor',red,'EdgeColor','none','FaceAlpha',0.3);
+    area(waveNicolet, avgSpecNicolet(a,:)-stdSpecNicolet(a,:),'FaceColor','w','EdgeColor','none');
     plot(waveNicolet,avgSpecNicolet(a,:),'Color',red,'LineWidth',2)
+    
+    %Plotting HyTES
+    area(waveHyTES, avgSpecHyTES(a,:)+stdSpecHyTES(a,:),'FaceColor',blue,'EdgeColor','none','FaceAlpha',0.3);
+    area(waveHyTES, avgSpecHyTES(a,:)-stdSpecHyTES(a,:),'FaceColor','w','EdgeColor','none');
     plot(waveHyTES,avgSpecHyTES(a,:),'Color',blue,'LineWidth',2)
+    
+    %Figure Features
     set(gca,'FontSize',24,'FontName','Cambria')
     xlabel(('Wavelength (\mum)')) % label x-axis
     ylabel('Emissivity')
@@ -68,29 +78,31 @@ for a = 1:size(species,1) %loop through species
     set(gca,'Ylim',[.88 1],'YTick',[.88:.03:1.0])
     set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
     set(gca,'ygrid','on')
+    title(char(species(a)))
     hold off
     
+    %Save Image
     set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 7 3.5])
     nameFile = strcat(dirOut,'\\Figures\\',char(species(a)),'_Compare_Zoom_Out');
     print(nameFile,'-dpng','-r0')
     
     % Zoomed In
-    figure('units','normalized','outerposition',[0 0 1 1])
-    hold on
-    plot(waveNicolet,avgSpecNicolet(a,:),'Color',red,'LineWidth',2)
-    plot(waveHyTES,avgSpecHyTES(a,:),'Color',blue,'LineWidth',2)
-    set(gca,'FontSize',24,'FontName','Cambria')
-    xlabel(('Wavelength (\mum)')) % label x-axis
-    ylabel('Emissivity')
-    set(gca,'Xlim',[8 11.5],'XTick',[8:.5:11.5])
-    set(gca,'Ylim',[.88 1],'YTick',[.88:.03:1.0])
-    set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
-    set(gca,'ygrid','on')
-    hold off
-    
-    set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 7 3.5])
-    nameFile = strcat(dirOut,'\\Figures\\',char(species(a)),'_Compare_Zoom_In');
-    print(nameFile,'-dpng','-r0')
+%     figure('units','normalized','outerposition',[0 0 1 1])
+%     hold on
+%     plot(waveNicolet,avgSpecNicolet(a,:),'Color',red,'LineWidth',2)
+%     plot(waveHyTES,avgSpecHyTES(a,:),'Color',blue,'LineWidth',2)
+%     set(gca,'FontSize',24,'FontName','Cambria')
+%     xlabel(('Wavelength (\mum)')) % label x-axis
+%     ylabel('Emissivity')
+%     set(gca,'Xlim',[8 11.5],'XTick',[8:.5:11.5])
+%     set(gca,'Ylim',[.88 1],'YTick',[.88:.03:1.0])
+%     set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
+%     set(gca,'ygrid','on')
+%     hold off
+%     
+%     set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 7 3.5])
+%     nameFile = strcat(dirOut,'\\Figures\\',char(species(a)),'_Compare_Zoom_In');
+%     print(nameFile,'-dpng','-r0')
 end
 
 %% END

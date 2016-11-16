@@ -82,7 +82,7 @@ for a = 1:size(species,1) %loop through species
     hold off
     
     %Save Image
-    set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 7 3.5])
+    set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 7.25 3.5])
     nameFile = strcat(dirOut,'\\Figures\\',char(species(a)),'_Compare_Zoom_Out');
     print(nameFile,'-dpng','-r0')
     

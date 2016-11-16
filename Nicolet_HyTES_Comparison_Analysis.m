@@ -30,24 +30,28 @@ spectraHyTES = cell2mat(table2cell(dataHyTES(:,[2:203]))); %convert to cell arra
 species = {'ALAR';'BABE';'BATU';'BRDI';'BRRU';'CACA';'CALE';'CEDE';'CHIN';'CHSP';'FICO';'FITH';'JAMI';'LAIN';'MAGR';'MELI';'PEAF';'PHVI';'POGR';'QUAG';'QUIL';'QURO';'QUSU';'QUVI';'SABA';'TAMU';'TITI'};
 dirOut = 'F:\\Dropbox\\Analysis\\JPL Analysis\\Nicolet_HyTES_Comparison\\'; %Output directory
 
-%% Averaging Species
-avgSpecNicolet = zeros(27,1738);
-avgSpecHyTES = zeros(27,202);
-
-for a = 1:size(species,1) %loop through species
-    specTemp = spectraNicolet(strcmp(metaNicolet(:,2),species(a)),:);
-    avgSpecNicolet(a,:) = mean(specTemp);
-    
-    specTemp = spectraHyTES(strcmp(metaHyTES(:,3),species(a)),:);
-    avgSpecHyTES(a,:) = mean(specTemp);
-end
-
 %% Brewer Colors
 red = [228 26 28] ./ 255;
 blue = [55 126 184] ./ 255;
 green = [77 175 74] ./ 255;
 purple = [152 78 163] ./ 255;
 orange = [255 127 0] ./ 255;
+
+%% Averaging Species
+avgSpecNicolet = zeros(27,1738);
+avgSpecHyTES = zeros(27,202);
+stdSpecNicolet = zeros(27,1738);
+stdSpecHyTES = zeros(27,202);
+
+for a = 1:size(species,1) %loop through species
+    specTemp = spectraNicolet(strcmp(metaNicolet(:,2),species(a)),:);
+    avgSpecNicolet(a,:) = mean(specTemp);
+    stdSpecNicolet(a,:) = std(specTemp);
+    
+    specTemp = spectraHyTES(strcmp(metaHyTES(:,3),species(a)),:);
+    avgSpecHyTES(a,:) = mean(specTemp);
+    stdSpecHyTES(a,:) = std(specTemp);
+end
 
 %% Plots for Comparison
 

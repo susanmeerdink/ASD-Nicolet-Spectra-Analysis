@@ -8,13 +8,13 @@
 % This code will analyze the spectra to determine similarities and differences.
 %% Import Data
 directory = 'F:\\Dropbox\\Analysis\\JPL Analysis\\HyTES spectra\\'; %Home directory
-dataFile = strcat(directory,'HyTES_Spectra_20161101.csv'); %Set to spectra file location
-metaFile = strcat(directory,'HyTES_Metadata_20161101.csv'); %Set to metadata file location
+dataFile = strcat(directory,'HyTES_Spectra.csv'); %Set to spectra file location
+metaFile = strcat(directory,'HyTES_Metadata.csv'); %Set to metadata file location
 data = readtable(dataFile); %Read in the averaged and std of spectra
 metaTable = readtable(metaFile); %Read in associated metadata of spectra
 allMeta = table2cell(metaTable); %Convert to cell array
 wavelengths = csvread(dataFile,0,1,[0 1 0 202]); %pull out wavelengths
-allSpectra = cell2mat(table2cell(data)); %convert to cell array
+allSpectra = cell2mat(table2cell(data(2:end,2:end))); %convert to cell array
 
 %% Find average/min/max/std of species
 acronym = unique(allMeta(:,3));
@@ -25,10 +25,10 @@ maxSpectra = zeros(27,202);
 
 for a = 1:length(acronym)
     spectra = allSpectra(strcmp(allMeta(:,3),acronym(a)),:);
-    avgSpectra(a,:) = mean(spectra(:,[2:203]));
-    stdSpectra(a,:) = std(spectra(:,[2:203]));
-    minSpectra(a,:) = min(spectra(:,[2:203]));
-    maxSpectra(a,:) = max(spectra(:,[2:203]));
+    avgSpectra(a,:) = mean(spectra(:,1:202));
+    stdSpectra(a,:) = std(spectra(:,1:202));
+    minSpectra(a,:) = min(spectra(:,1:202));
+    maxSpectra(a,:) = max(spectra(:,1:202));
     
     % Display average and std for species
     figure('units','normalized','outerposition',[0 0 1 1])
@@ -64,7 +64,7 @@ axis([8 11.5 0.85 1])
 close all
 for a = 1:length(acronym)
     figure('units','normalized','outerposition',[0 0 1 1])
-    y = allSpectra(strcmp(allMeta(:,3),acronym(a)),[2:203])';
+    y = allSpectra(strcmp(allMeta(:,3),acronym(a)),1:202)';
     x = repmat(wavelengths,size(y,2),1)';
     line(x,y);
     text(8.02,0.99,num2str(size(y,2)));
@@ -144,28 +144,6 @@ for l = 1: size(pairTotal,1)
     add2 = repmat(n2,[pairTotal(l),1]);
     pairList = vertcat(pairList,add1,add2);
 end
-%% Histogram
-figure('units','normalized','outerposition',[0 0 0.85 1])
-hold on
-
-%Create a second axes in the same location as the first axes by setting the position of the second axes equal to the position of the first axes. 
-ax1 = gca; %current axis
-AxesHandle = findobj(gcf,'Type','axes');
-ax1_pos = get(AxesHandle,'Position'); % position of first axes
-ax2 = axes('Position',ax1_pos,'YAxisLocation','right','Color','none');
-histogram(waveList,'FaceColor',blue,'Parent',ax1) %cell2mat(
-
-input = allSpectra(13,[2:size(allSpectra,2)]);
-line(wavelengths,input,'Color','r','LineWidth',1.5,'Parent',ax2)
-
-set(ax1,'Xlim',[8 11.6],'XTick',[8:.5:12]) %,'Ylim',[0 ],'YTick',[0:0.01: 0.06]
-set(ax2,'Ylim',[.85 1],'Xlim',[8 11.5],'XTick',[]); %'YTick',[.98:.2:1]
-xlabel(ax1,['Wavelength ( \mum )']) % label x-axis
-ylabel(ax1,'Frequency') % label left y-axis
-ylabel(ax2,'Emissivity') % label left y-axis
-set(ax1, 'FontSize',30)
-set(ax2, 'FontSize',30)
-hold off
 
 %% Histogram without Emissivity
 figure('units','normalized','outerposition',[0 0 1 1])

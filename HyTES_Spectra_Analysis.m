@@ -8,13 +8,23 @@
 % This code will analyze the spectra to determine similarities and differences.
 %% Import Data
 directory = 'F:\\Dropbox\\Analysis\\JPL Analysis\\HyTES spectra\\'; %Home directory
-dataFile = strcat(directory,'HyTES_Spectra.csv'); %Set to spectra file location
-metaFile = strcat(directory,'HyTES_Metadata.csv'); %Set to metadata file location
-data = readtable(dataFile); %Read in the averaged and std of spectra
+dataFile = strcat(directory,'HyTES_Spectra_GeoRef.csv'); %Set to spectra file location
+metaFile = strcat(directory,'HyTES_Metadata_GeoRef.csv'); %Set to metadata file location
+tempFile = strcat(directory,'HyTES_Temp_GeoRef.csv'); %Set to temperature file location
+dataEmiss = readtable(dataFile); %Read in the averaged and std of spectra
 metaTable = readtable(metaFile); %Read in associated metadata of spectra
+dataTemp = readtable(tempFile); %Read in temperature values
 allMeta = table2cell(metaTable); %Convert to cell array
 wavelengths = csvread(dataFile,0,1,[0 1 0 202]); %pull out wavelengths
-allSpectra = cell2mat(table2cell(data(2:end,2:end))); %convert to cell array
+allSpectra = cell2mat(table2cell(dataEmiss(2:end,2:end))); %convert to cell array
+allTemp = cell2mat(table2cell(dataTemp(:,2))); %convert to cell array
+
+%% Brewer Colors
+red = [228 26 28] ./ 255;
+blue = [55 126 184] ./ 255;
+green = [77 175 74] ./ 255;
+purple = [152 78 163] ./ 255;
+orange = [255 127 0] ./ 255;
 
 %% Find average/min/max/std of species
 acronym = unique(allMeta(:,3));
@@ -74,12 +84,6 @@ for a = 1:length(acronym)
     set(gca,'FontSize',24);
     title(acronym(a));
 end
-%% Brewer Colors
-red = [228 26 28] ./ 255;
-blue = [55 126 184] ./ 255;
-green = [77 175 74] ./ 255;
-purple = [152 78 163] ./ 255;
-orange = [255 127 0] ./ 255;
 
 %% figures for only 5 species - POSTER
 %close all
@@ -145,7 +149,7 @@ for l = 1: size(pairTotal,1)
     pairList = vertcat(pairList,add1,add2);
 end
 
-%% Histogram without Emissivity
+%% Histogram without Emissivity - POSTER
 figure('units','normalized','outerposition',[0 0 1 1])
 hold on
 
@@ -172,7 +176,10 @@ figure('units','normalized','outerposition',[0 0 1 1])
 bar(sorted)
 set(gca,'XTick',1:1:27,'XTickLabel',sortedSpecies);
 
-%% Plotting least separable species
+set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.5 4])
+nameFile = strcat(directory,'\\Figures\\HyTES_least_separable');
+print(nameFile,'-dpng','-r0')
+%% Plotting least separable species - POSTER
 close all
 figure('units','normalized','outerposition',[0 0 1 1])
 hold on
@@ -192,7 +199,7 @@ hold off
 set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.5 4])
 nameFile = strcat(directory,'\\Figures\\HyTES_least_separable');
 print(nameFile,'-dpng','-r0')
-%% Plotting most separable species
+%% Plotting most separable species - POSTER
 close all
 figure('units','normalized','outerposition',[0 0 1 1])
 hold on
@@ -213,5 +220,14 @@ set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 
 nameFile = strcat(directory,'\\Figures\\HyTES_most_separable');
 print(nameFile,'-dpng','-r0')
 
+%% Normal Tests for Temp
+
+for a = 1:length(acronym)
+    temp = allTemp(strcmp(allMeta(:,3),acronym(a)),:);
+    figure('units','normalized','outerposition',[0 0 0.5 1])
+    hist(temp);
+    title(char(acronym(a)))
+end
+%Temperature is not normal
 %% END
 close all

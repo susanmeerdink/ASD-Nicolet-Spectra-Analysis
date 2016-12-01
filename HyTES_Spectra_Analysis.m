@@ -11,13 +11,21 @@ directory = 'F:\\Dropbox\\Analysis\\JPL Analysis\\HyTES spectra\\'; %Home direct
 dataFile = strcat(directory,'HyTES_Spectra_GeoRef.csv'); %Set to spectra file location
 metaFile = strcat(directory,'HyTES_Metadata_GeoRef.csv'); %Set to metadata file location
 tempFile = strcat(directory,'HyTES_Temp_GeoRef.csv'); %Set to temperature file location
-dataEmiss = readtable(dataFile); %Read in the averaged and std of spectra
+dataEmiss = readtable(dataFile,'HeaderLines',1,'ReadRowNames',1); %Read in the averaged and std of spectra
 metaTable = readtable(metaFile); %Read in associated metadata of spectra
 dataTemp = readtable(tempFile); %Read in temperature values
 allMeta = table2cell(metaTable); %Convert to cell array
 wavelengths = csvread(dataFile,0,1,[0 1 0 202]); %pull out wavelengths
-allSpectra = cell2mat(table2cell(dataEmiss(2:end,2:end))); %convert to cell array
+allSpectra = cell2mat(table2cell(dataEmiss)); %convert to cell array
 allTemp = cell2mat(table2cell(dataTemp(:,2))); %convert to cell array
+
+% names = {};
+% for w = 1:size(wavelengths,2)
+%     c = strcat('w',char(num2str(wavelengths(w))));
+%     c = strrep(c,'.','_');
+%     names{w} = c;
+% end
+% dataEmiss.Properties.VariableNames = names;
 
 %% Brewer Colors
 red = [228 26 28] ./ 255;
@@ -25,6 +33,7 @@ blue = [55 126 184] ./ 255;
 green = [77 175 74] ./ 255;
 purple = [152 78 163] ./ 255;
 orange = [255 127 0] ./ 255;
+red2blue = [];
 
 %% Find average/min/max/std of species
 acronym = unique(allMeta(:,3));
@@ -56,6 +65,8 @@ for a = 1:length(acronym)
     hold off
 end
 
+%% Figures of Averaged Plant Species
+%Plots of species average spectra
 figure('units','normalized','outerposition',[0 0 .5 1])
 plot(wavelengths,avgSpectra((1:9),:))
 legend(acronym(1:9))
@@ -70,6 +81,28 @@ figure('units','normalized','outerposition',[0 0 .5 1])
 plot(wavelengths,avgSpectra((19:27),:))
 legend(acronym(19:27))
 axis([8 11.5 0.85 1])
+
+%% Image scaled color Figure of average species - POSTER
+figure('units','normalized','outerposition',[0 0 1 1])
+hold on
+imagesc(wavelengths,1:1:27,avgSpectra,[0.85 1])
+cmap = makeColorMap(green, blue, red, 9);
+colormap(cmap);
+c = colorbar('eastoutside','Ticks',[0.85:0.03:1]);
+ylabel(c,'Emissivity')
+colorbar('off');
+set(gca,'FontSize',22,'FontName','Cambria')
+set(gca,'Xlim',[8 11.5],'XTick',[8:.5:11.5])
+set(gca,'Ylim',[0.5 27.5],'YTick',[1:1:27],'Ydir','reverse')
+yticklabels(acronym)
+xlabel(['Wavelength (\mum)'],'FontSize',24) % label x-axis
+%set(c,'FontSize',24,'FontName','Cambria')
+hold off
+
+set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.75 8])
+nameFile = strcat(directory,'\\Figures\\HyTES_all_species_sample');
+print(nameFile,'-dpng','-r0')
+
 %% Display species spectra
 close all
 for a = 1:length(acronym)
@@ -94,7 +127,7 @@ plot(wavelengths,avgSpectra(strcmp(acronym,'JAMI'),:),'Color',blue,'LineWidth',2
 plot(wavelengths,avgSpectra(strcmp(acronym,'MAGR'),:),'Color',green,'LineWidth',2)
 plot(wavelengths,avgSpectra(strcmp(acronym,'PEAF'),:),'Color',purple,'LineWidth',2)
 plot(wavelengths,avgSpectra(strcmp(acronym,'QURO'),:),'Color',orange,'LineWidth',2)
-set(gca,'FontSize',24,'FontName','Cambria')
+set(gca,'FontSize',22,'FontName','Cambria')
 xlabel(['Wavelength (\mum)']) % label x-axis
 ylabel('Emissivity')
 set(gca,'Xlim',[8 11.5],'XTick',[8:.5:11.5])
@@ -103,7 +136,7 @@ set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
 set(gca,'ygrid','on')
 hold off
 
-set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.5 4])
+set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.75 3.75])
 nameFile = strcat(directory,'\\Figures\\HyTES_species_sample');
 print(nameFile,'-dpng','-r0')
 %% Non Parametric Tests
@@ -166,7 +199,8 @@ set(gca,'FontSize',24,'FontName','Cambria')
 hold off
 
 set(gca,'YTickMode','manual','YLimMode','manual');
-set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.5 4.2])
+%set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.5 4.2])
+set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 7.25 4.2])
 nameFile = strcat(directory,'\\Figures\\HyTES_influential_wavelengths');
 print(nameFile,'-dpng','-r0')
 
@@ -190,7 +224,7 @@ plot(wavelengths,avgSpectra(strcmp(acronym,sortedSpecies(1)),:),'Color',red,'Lin
 plot(wavelengths,avgSpectra(strcmp(acronym,sortedSpecies(2)),:),'Color',blue,'LineWidth',2)
 plot(wavelengths,avgSpectra(strcmp(acronym,sortedSpecies(3)),:),'Color',green,'LineWidth',2)
 plot(wavelengths,avgSpectra(strcmp(acronym,sortedSpecies(4)),:),'Color',purple,'LineWidth',2)
-set(gca,'FontSize',24,'FontName','Cambria')
+set(gca,'FontSize',22,'FontName','Cambria')
 xlabel(['Wavelength (\mum)']) % label x-axis
 ylabel('Emissivity')
 set(gca,'Xlim',[8 11.5],'XTick',[8:.5:11.5])
@@ -199,7 +233,7 @@ set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
 set(gca,'ygrid','on')
 hold off
 
-set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.5 4])
+set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.75 3.75])
 nameFile = strcat(directory,'\\Figures\\HyTES_least_separable');
 print(nameFile,'-dpng','-r0')
 %% Plotting most separable species - POSTER
@@ -210,7 +244,7 @@ plot(wavelengths,avgSpectra(strcmp(acronym,sortedSpecies(27)),:),'Color',red,'Li
 plot(wavelengths,avgSpectra(strcmp(acronym,sortedSpecies(26)),:),'Color',blue,'LineWidth',2)
 plot(wavelengths,avgSpectra(strcmp(acronym,sortedSpecies(25)),:),'Color',green,'LineWidth',2)
 plot(wavelengths,avgSpectra(strcmp(acronym,sortedSpecies(24)),:),'Color',purple,'LineWidth',2)
-set(gca,'FontSize',24,'FontName','Cambria')
+set(gca,'FontSize',22,'FontName','Cambria')
 xlabel(['Wavelength (\mum)']) % label x-axis
 ylabel('Emissivity')
 set(gca,'Xlim',[8 11.5],'XTick',[8:.5:11.5])
@@ -219,10 +253,13 @@ set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
 set(gca,'ygrid','on')
 hold off
 
-set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.5 4])
+set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.75 3.75])
 nameFile = strcat(directory,'\\Figures\\HyTES_most_separable');
 print(nameFile,'-dpng','-r0')
 
+%% Clustering
+tree = linkage(avgSpectra,'median');
+dendrogram(tree,'Labels',acronym)
 %% Normal Tests for Temp
 
 for a = 1:length(acronym)

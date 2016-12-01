@@ -30,6 +30,13 @@ for s = 1:size(species,1) %loop through the species
     repSpectra = vertcat(repSpectra, allSpectra(index,:));
     repMetadata = vertcat(repMetadata,allMeta(index,:));
 end
+
+%% Brewer Colors
+red = [228 26 28] ./ 255;
+blue = [55 126 184] ./ 255;
+green = [77 175 74] ./ 255;
+purple = [152 78 163] ./ 255;
+orange = [255 127 0] ./ 255;
 %% Find average/min/max/std of species
 avgSpectra = zeros(27,1738);
 stdSpectra = zeros(27,1738);
@@ -58,6 +65,28 @@ for a = 1:size(species,1)
     axis([2.5 15 .85 1])
     hold off
 end
+
+%% Image scaled color Figure of average species - POSTER
+figure('units','normalized','outerposition',[0 0 1 1])
+hold on
+imagesc(wavelengths,1:1:27,avgSpectra,[0.85 1])
+cmap = makeColorMap(green, blue, red, 9);
+colormap(cmap);
+c = colorbar('southoutside','Ticks',[0.85:0.03:1]);
+ylabel(c,'Emissivity')
+colorbar('off');
+set(gca,'FontSize',22,'FontName','Cambria')
+set(gca,'Xlim',[2.5 15],'XTick',[2.5:2.5:15])
+set(gca,'Ylim',[0.5 27.5],'YTick',[1:1:27],'Ydir','reverse')
+yticklabels(species)
+xlabel(['Wavelength (\mum)']) % label x-axis
+%set(c,'FontSize',24,'FontName','Cambria')
+hold off
+
+set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.75 8])
+nameFile = strcat(directory,'\\Figures\\Nicolet_all_species_sample');
+print(nameFile,'-dpng','-r0')
+
 %% Display species spectra
 close all
 acronym = unique(allMeta(:,2));
@@ -73,13 +102,6 @@ for a = 1:length(acronym)
     set(gca,'FontSize',24);
     title(acronym(a));
 end
-%% Brewer Colors
-red = [228 26 28] ./ 255;
-blue = [55 126 184] ./ 255;
-green = [77 175 74] ./ 255;
-purple = [152 78 163] ./ 255;
-orange = [255 127 0] ./ 255;
-
 %% figures for only 5 species - POSTER
 close all
 figure('units','normalized','outerposition',[0 0 1 1])
@@ -98,7 +120,7 @@ set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
 set(gca,'ygrid','on')
 hold off
 
-set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.5 4])
+set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.75 3.75])
 nameFile = strcat(directory,'\\Figures\\Nicolet_species_sample');
 print(nameFile,'-dpng','-r0')
 
@@ -167,7 +189,7 @@ set(ax1, 'FontSize',30)
 set(ax2, 'FontSize',30)
 hold off
 
-%% Histogram without Emissivity
+%% Histogram without Emissivity -POSTER
 figure('units','normalized','outerposition',[0 0 1 1])
 hold on
 
@@ -181,7 +203,8 @@ set(gca,'FontSize',24,'FontName','Cambria')
 hold off
 
 set(gca,'YTickMode','manual','YLimMode','manual');
-set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.5 4.2])
+%set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.5 4.2])
+set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 7.25 4.2])
 nameFile = strcat(directory,'\\Figures\\Nicolet_influential_wavelengths');
 print(nameFile,'-dpng','-r0')
 %% Separable Species
@@ -210,7 +233,7 @@ set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
 set(gca,'ygrid','on')
 hold off
 
-set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.5 4])
+set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.75 3.75])
 nameFile = strcat(directory,'\\Figures\\Nicolet_least_separable');
 print(nameFile,'-dpng','-r0')
 %% Plotting most separable species
@@ -230,7 +253,7 @@ set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
 set(gca,'ygrid','on')
 hold off
 
-set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.5 4])
+set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.75 3.75])
 nameFile = strcat(directory,'\\Figures\\Nicolet_most_separable');
 print(nameFile,'-dpng','-r0')
 %% END

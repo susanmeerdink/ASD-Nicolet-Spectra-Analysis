@@ -85,7 +85,7 @@ for a = 1:length(acronym)
     title(acronym(a));
 end
 
-%% figures for only 5 species - POSTER
+%% Figure of only 5 species - POSTER
 %close all
 figure('units','normalized','outerposition',[0 0 1 1])
 hold on
@@ -118,6 +118,8 @@ pairs  = [a(mask) b(mask)];
 pValue = []; %Empty array to hold pvalues from mann - whitney u test
 results = [];
 results(:,1:2) = pairs; %add onto this array with pvalue results
+resultsRS = [];
+resultsRS(:,1:2) = pairs; %add onto this array with pvalue results
 
 for w = 1:size(wavelengths,2) %loopthrough wavelengths
     for i = 1: size(pairs,1) %loop through the pair list
@@ -125,8 +127,9 @@ for w = 1:size(wavelengths,2) %loopthrough wavelengths
         g2Index = strmatch(char(acronym(pairs(i,2))),cell2mat(allMeta(:,3)));
         g1 = allSpectra(g1Index,w);
         g2 = allSpectra(g2Index,w);
-        p = ranksum(g1,g2);
+        [p,~,stats] = ranksum(g1,g2);
         results(i,2+w) = p;
+        resultsRS(i,2+w) = stats.ranksum;
     end 
 end
 
@@ -229,5 +232,19 @@ for a = 1:length(acronym)
     title(char(acronym(a)))
 end
 %Temperature is not normal
+
+%% Non parametric tests for Temp
+resultsTemp = [];
+resultsTemp(:,1:2) = pairs; %add onto this array with pvalue results
+
+for i = 1: size(pairs,1) %loop through the pair list
+    g1Index = strmatch(char(acronym(pairs(i,1))),cell2mat(allMeta(:,3)));
+    g2Index = strmatch(char(acronym(pairs(i,2))),cell2mat(allMeta(:,3)));
+    g1 = allTemp(g2Index);
+    g2 = allTemp(g2Index);
+    [p,~,stats] = ranksum(g1,g2);
+    resultsTemp(i,3) = p;
+    resultsTemp(i,4) = stats.ranksum;
+end
 %% END
 close all

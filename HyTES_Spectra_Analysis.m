@@ -189,16 +189,17 @@ end
 figure('units','normalized','outerposition',[0 0 1 1])
 hold on
 
-%Create a second axes in the same location as the first axes by setting the position of the second axes equal to the position of the first axes. 
-histogram(waveList,'FaceColor',red) %cell2mat(
+histogram(waveList,'FaceColor',red) %
+set(gca,'ygrid','on')
+histogram(waveList,'FaceColor',red) %
 
 set(gca,'Xlim',[7.95 11.6],'XTick',[8:.5:12]) %,'Ylim',[0 ],'YTick',[0:0.01: 0.06]
 xlabel(['Wavelength ( \mum )']) % label x-axis
 ylabel('Frequency') % label left y-axis
 set(gca,'FontSize',24,'FontName','Cambria')
+set(gca,'YTickMode','manual','YLimMode','manual');
 hold off
 
-set(gca,'YTickMode','manual','YLimMode','manual');
 %set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.5 4.2])
 set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 7.25 4.2])
 nameFile = strcat(directory,'\\Figures\\HyTES_influential_wavelengths');

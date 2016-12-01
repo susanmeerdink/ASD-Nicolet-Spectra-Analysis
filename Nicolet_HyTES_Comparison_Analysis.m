@@ -20,8 +20,8 @@ spectraNicolet = (100-spectraNicolet)/100; %converting to emissivity
 
 %Read in HyTES (canopy level) data
 dirHyTES = 'F:\\Dropbox\\Analysis\\JPL Analysis\\HyTES spectra\\'; %Home directory
-dataFileHyTES = strcat(dirHyTES,'HyTES_Spectra_20161101.csv'); %Set to spectra file location
-metaFileHyTES = strcat(dirHyTES,'HyTES_Metadata_20161101.csv'); %Set to metadata file location
+dataFileHyTES = strcat(dirHyTES,'HyTES_Spectra_GeoRef.csv'); %Set to spectra file location
+metaFileHyTES = strcat(dirHyTES,'HyTES_Metadata_GeoRef.csv'); %Set to metadata file location
 dataHyTES = readtable(dataFileHyTES); %Read in the averaged and std of spectra
 metaHyTES = table2cell(readtable(metaFileHyTES)); %Convert to cell array
 waveHyTES = csvread(dataFileHyTES,0,1,[0 1 0 202]); %pull out wavelengths
@@ -61,13 +61,15 @@ for a = 1:size(species,1) %loop through species
     hold on
     
     %Plotting Nicolet
-    p = area(waveNicolet, avgSpecNicolet(a,:)+stdSpecNicolet(a,:),'FaceColor',red,'EdgeColor','none','FaceAlpha',0.3);
-    area(waveNicolet, avgSpecNicolet(a,:)-stdSpecNicolet(a,:),'FaceColor','w','EdgeColor','none');
+    x = [waveNicolet, flip(waveNicolet)];
+    y = [avgSpecNicolet(a,:)+stdSpecNicolet(a,:), flip(avgSpecNicolet(a,:)-stdSpecNicolet(a,:))];
+    fill(x,y,red,'EdgeColor','none','FaceAlpha',0.3);
     plot(waveNicolet,avgSpecNicolet(a,:),'Color',red,'LineWidth',2)
     
     %Plotting HyTES
-    area(waveHyTES, avgSpecHyTES(a,:)+stdSpecHyTES(a,:),'FaceColor',blue,'EdgeColor','none','FaceAlpha',0.3);
-    area(waveHyTES, avgSpecHyTES(a,:)-stdSpecHyTES(a,:),'FaceColor','w','EdgeColor','none');
+    x = [waveHyTES, flip(waveHyTES)];
+    y = [avgSpecHyTES(a,:)+stdSpecHyTES(a,:), flip(avgSpecHyTES(a,:)-stdSpecHyTES(a,:))];
+    fill(x,y,blue,'EdgeColor','none','FaceAlpha',0.3);
     plot(waveHyTES,avgSpecHyTES(a,:),'Color',blue,'LineWidth',2)
     
     %Figure Features

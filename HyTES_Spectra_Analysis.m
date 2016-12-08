@@ -91,7 +91,7 @@ colormap(cmap);
 c = colorbar('eastoutside','Ticks',[0.85:0.03:1]);
 ylabel(c,'Emissivity')
 colorbar('off');
-set(gca,'FontSize',22,'FontName','Cambria')
+set(gca,'FontSize',24,'FontName','Cambria')
 set(gca,'Xlim',[8 11.5],'XTick',[8:.5:11.5])
 set(gca,'Ylim',[0.5 27.5],'YTick',[1:1:27],'Ydir','reverse')
 yticklabels(acronym)
@@ -99,7 +99,7 @@ xlabel(['Wavelength (\mum)'],'FontSize',24) % label x-axis
 %set(c,'FontSize',24,'FontName','Cambria')
 hold off
 
-set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.75 8])
+set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.75 9])
 nameFile = strcat(directory,'\\Figures\\HyTES_all_species_sample');
 print(nameFile,'-dpng','-r0')
 
@@ -201,7 +201,7 @@ set(gca,'YTickMode','manual','YLimMode','manual');
 hold off
 
 %set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 8.5 4.2])
-set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 7.25 4.2])
+set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 7.25 3.75])
 nameFile = strcat(directory,'\\Figures\\HyTES_influential_wavelengths');
 print(nameFile,'-dpng','-r0')
 

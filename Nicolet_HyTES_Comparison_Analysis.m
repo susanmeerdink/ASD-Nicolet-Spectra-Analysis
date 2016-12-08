@@ -89,22 +89,34 @@ for a = 1:size(species,1) %loop through species
     print(nameFile,'-dpng','-r0')
     
     % Zoomed In
-%     figure('units','normalized','outerposition',[0 0 1 1])
-%     hold on
-%     plot(waveNicolet,avgSpecNicolet(a,:),'Color',red,'LineWidth',2)
-%     plot(waveHyTES,avgSpecHyTES(a,:),'Color',blue,'LineWidth',2)
-%     set(gca,'FontSize',24,'FontName','Cambria')
-%     xlabel(('Wavelength (\mum)')) % label x-axis
-%     ylabel('Emissivity')
-%     set(gca,'Xlim',[8 11.5],'XTick',[8:.5:11.5])
-%     set(gca,'Ylim',[.88 1],'YTick',[.88:.03:1.0])
-%     set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
-%     set(gca,'ygrid','on')
-%     hold off
-%     
-%     set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 7 3.5])
-%     nameFile = strcat(dirOut,'\\Figures\\',char(species(a)),'_Compare_Zoom_In');
-%     print(nameFile,'-dpng','-r0')
+    figure('units','normalized','outerposition',[0 0 1 1])
+    hold on
+       
+    %Plotting Nicolet
+    x = [waveNicolet, flip(waveNicolet)];
+    y = [avgSpecNicolet(a,:)+stdSpecNicolet(a,:), flip(avgSpecNicolet(a,:)-stdSpecNicolet(a,:))];
+    fill(x,y,red,'EdgeColor','none','FaceAlpha',0.3);
+    plot(waveNicolet,avgSpecNicolet(a,:),'Color',red,'LineWidth',2)
+    
+    %Plotting HyTES
+    x = [waveHyTES, flip(waveHyTES)];
+    y = [avgSpecHyTES(a,:)+stdSpecHyTES(a,:), flip(avgSpecHyTES(a,:)-stdSpecHyTES(a,:))];
+    fill(x,y,blue,'EdgeColor','none','FaceAlpha',0.3);
+    plot(waveHyTES,avgSpecHyTES(a,:),'Color',blue,'LineWidth',2)
+    
+    set(gca,'FontSize',24,'FontName','Cambria')
+    xlabel(('Wavelength (\mum)')) % label x-axis
+    ylabel('Emissivity')
+    set(gca,'Xlim',[8 11.5],'XTick',[8:.5:11.5])
+    set(gca,'Ylim',[.88 1],'YTick',[.88:.03:1.0])
+    set(gca,'yticklabel',num2str(get(gca,'ytick')','%.2f'))
+    set(gca,'ygrid','on')
+    title(char(species(a)))
+    hold off
+    
+    set(gcf,'PaperUnits','inches','PaperPositionMode','manual','PaperPosition',[0 0 7 3.5])
+    nameFile = strcat(dirOut,'\\Figures\\',char(species(a)),'_Compare_Zoom_In');
+    print(nameFile,'-dpng','-r0')
 end
 
 %% END
